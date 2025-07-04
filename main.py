@@ -3,6 +3,7 @@ import sqlite3
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import json
+from jsonschema import validate, ValidationError
 
 # Database setup
 DATABASE_URL = "dataset.db"
@@ -110,12 +111,30 @@ def delete_schema(schema_id: int):
 @app.post("/items/", response_model=DatasetItem)
 def create_item(item: DatasetItemCreate):
     conn = get_db_connection()
-    cursor = conn.execute(
-        "INSERT INTO dataset_items (schema_id, input_data, output_data) VALUES (?, ?, ?)",
-        (item.schema_id, json.dumps(item.input_data), json.dumps(item.output_data)),
-    )
-    conn.commit()
-    return {**item.model_dump(), "id": cursor.lastrowid}
+    try:
+        # Fetch the schema
+        schema = conn.execute("SELECT * FROM dataset_schemas WHERE id = ?", (item.schema_id,)).fetchone()
+        if schema is None:
+            raise HTTPException(status_code=404, detail=f"Schema with id {item.schema_id} not found")
+
+        input_schema = json.loads(schema["input_schema"])
+        output_schema = json.loads(schema["output_schema"])
+
+        # Validate input and output data
+        try:
+            validate(instance=item.input_data, schema=input_schema)
+            validate(instance=item.output_data, schema=output_schema)
+        except ValidationError as e:
+            raise HTTPException(status_code=400, detail=f"Data validation error: {e.message}")
+
+        cursor = conn.execute(
+            "INSERT INTO dataset_items (schema_id, input_data, output_data) VALUES (?, ?, ?)",
+            (item.schema_id, json.dumps(item.input_data), json.dumps(item.output_data)),
+        )
+        conn.commit()
+        return {**item.model_dump(), "id": cursor.lastrowid}
+    finally:
+        conn.close()
 
 @app.get("/items/{item_id}", response_model=DatasetItem)
 def read_item(item_id: int):
@@ -134,13 +153,30 @@ def read_item(item_id: int):
 @app.put("/items/{item_id}", response_model=DatasetItem)
 def update_item(item_id: int, item: DatasetItemCreate):
     conn = get_db_connection()
-    conn.execute(
-        "UPDATE dataset_items SET schema_id = ?, input_data = ?, output_data = ? WHERE id = ?",
-        (item.schema_id, json.dumps(item.input_data), json.dumps(item.output_data), item_id),
-    )
-    conn.commit()
-    conn.close()
-    return {**item.model_dump(), "id": item_id}
+    try:
+        # Fetch the schema
+        schema = conn.execute("SELECT * FROM dataset_schemas WHERE id = ?", (item.schema_id,)).fetchone()
+        if schema is None:
+            raise HTTPException(status_code=404, detail=f"Schema with id {item.schema_id} not found")
+
+        input_schema = json.loads(schema["input_schema"])
+        output_schema = json.loads(schema["output_schema"])
+
+        # Validate input and output data
+        try:
+            validate(instance=item.input_data, schema=input_schema)
+            validate(instance=item.output_data, schema=output_schema)
+        except ValidationError as e:
+            raise HTTPException(status_code=400, detail=f"Data validation error: {e.message}")
+
+        conn.execute(
+            "UPDATE dataset_items SET schema_id = ?, input_data = ?, output_data = ? WHERE id = ?",
+            (item.schema_id, json.dumps(item.input_data), json.dumps(item.output_data), item_id),
+        )
+        conn.commit()
+        return {**item.model_dump(), "id": item_id}
+    finally:
+        conn.close()
 
 @app.delete("/items/{item_id}")
 def delete_item(item_id: int):
