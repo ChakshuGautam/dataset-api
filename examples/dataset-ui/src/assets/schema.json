@@ -1,0 +1,178 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://example.com/children-literature-analysis.schema.json",
+    "title": "Children's Literature Analysis",
+    "description": "Schema for analyzing children's stories and extracting detailed attributes",
+    "type": "object",
+    "properties": {
+        "story_title": {
+            "type": "string",
+            "description": "The exact title of the book (optional)",
+            "minLength": 1
+        },
+        "level": {
+            "type": "string",
+            "description": "Reading level, typically a numeral (e.g., '3') (optional)",
+            "pattern": "^[0-9]+$|^[A-Z]+$|^[a-z]+$"
+        },
+        "characters": {
+            "type": "object",
+            "description": "Characters grouped by importance",
+            "properties": {
+                "primary": {
+                    "type": "array",
+                    "description": "Main characters and their attributes",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "minItems": 1
+                },
+                "secondary": {
+                    "type": "array",
+                    "description": "Supporting characters and their attributes",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            },
+            "required": [
+                "primary",
+                "secondary"
+            ],
+            "additionalProperties": false
+        },
+        "settings": {
+            "type": "object",
+            "description": "Settings grouped by importance",
+            "properties": {
+                "primary": {
+                    "type": "array",
+                    "description": "Main settings from the narrative",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "minItems": 1
+                },
+                "secondary": {
+                    "type": "array",
+                    "description": "Supporting or background settings",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            },
+            "required": [
+                "primary",
+                "secondary"
+            ],
+            "additionalProperties": false
+        },
+        "themes": {
+            "type": "object",
+            "description": "Themes, concepts, and keywords grouped by importance",
+            "properties": {
+                "primary": {
+                    "type": "array",
+                    "description": "Main themes and core concepts",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "minItems": 1
+                },
+                "secondary": {
+                    "type": "array",
+                    "description": "Supporting themes and nuanced concepts",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            },
+            "required": [
+                "primary",
+                "secondary"
+            ],
+            "additionalProperties": false
+        },
+        "events": {
+            "type": "object",
+            "description": "Plot events grouped by importance",
+            "properties": {
+                "primary": {
+                    "type": "array",
+                    "description": "Main plot points in chronological order",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "minItems": 1
+                },
+                "secondary": {
+                    "type": "array",
+                    "description": "Supporting events and plot details",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            },
+            "required": [
+                "primary",
+                "secondary"
+            ],
+            "additionalProperties": false
+        },
+        "emotions": {
+            "type": "object",
+            "description": "Emotional arc and moral concepts grouped by importance",
+            "properties": {
+                "primary": {
+                    "type": "array",
+                    "description": "Core emotions and primary character motivations",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "minItems": 1
+                },
+                "secondary": {
+                    "type": "array",
+                    "description": "Supporting emotions and abstract moral concepts",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            },
+            "required": [
+                "primary",
+                "secondary"
+            ],
+            "additionalProperties": false
+        },
+        "keywords": {
+            "type": "array",
+            "description": "Flat list of all relevant keywords from the entire book",
+            "items": {
+                "type": "string",
+                "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        }
+    },
+    "required": [
+        "characters",
+        "settings",
+        "themes",
+        "events",
+        "emotions",
+        "keywords"
+    ],
+    "additionalProperties": false
+}
